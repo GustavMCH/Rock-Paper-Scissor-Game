@@ -1,41 +1,75 @@
-function getComputerChoice () {
-    let options = ["rock", "paper", "scissor"];
-    let choice = options[Math.floor(Math.random() * options.length)];
-    return choice;
-}
-
-function getHumanChoice () {
-    const humanChoice = prompt("choose between rock paper and  scissor");
-    const caseInsensitive = humanChoice.toLocaleLowerCase();
-    return caseInsensitive;
-}
-
+// GAME STATE
 let humanScore = 0;
 let computerScore = 0;
 
+// Rules of the game: key beats the value
+const rules = {
+    rock: "scissor", 
+    scissor: "paper",
+    paper: "rock"
+};
+
+// Target elements
+const result = document.querySelector("#results");
+const scoreDisplay = document.querySelector("#score");
+
+// HELPER FUNCTIONS
+function displayResult(text) {
+    const li = document.createElement("li");
+    li.textContent = text;
+    result.appendChild(li);
+}
+
+function updateScore() {
+    scoreDisplay.textContent = `Player: ${humanScore} | Computer: ${computerScore}`;
+}
+
+function getComputerChoice() {
+    const options = ["rock", "paper", "scissor"];
+    return options[Math.floor(Math.random() * options.length)];
+}
+
+// GAME LOGIC
 function playRound(humanChoice, computerChoice) {
-    if (
-        (humanChoice === "rock" && computerChoice === "scissor") ||
-        (humanChoice === "paper" && computerChoice === "rock") ||
-        (humanChoice === "scissor" && computerChoice === "paper")
-    ) {
-        console.log(`${humanChoice} beats ${computerChoice}`)
+    if (humanChoice === computerChoice) {
+        displayResult(`Tie! You both chose ${humanChoice}`);
+    }
+    else if (rules[humanChoice] === computerChoice) {
         humanScore++;
-        console.log(`Player score is ${humanScore} and the pc is ${computerScore}`)
-    } else if (humanChoice === computerChoice) {
-        console.log("It is a tie");
-        console.log(`Player score is ${humanScore} and the pc is ${computerScore}`)
-    } else {
-        console.log(`${computerChoice} beats ${humanChoice}`);
+        displayResult(`Player wins this round! ${humanChoice} beats ${computerChoice}`);
+    } 
+    else {
         computerScore++;
-        console.log(`Player score is ${humanScore} and the pc is ${computerScore}`)
+        displayResult(`Computer wins this round! ${computerChoice} beats ${humanChoice}`);
+    }
+
+    // Always update score after round
+    updateScore();
+
+    // ✅ Declare winner only once when score hits 5
+    if (humanScore === 5) {
+        displayResult("🎉 Player is the champion!");
+        endGame();
+    } 
+    else if (computerScore === 5) {
+        displayResult("💻 Computer is the champion!");
+        endGame();
     }
 }
 
-function playGame () {
-    for (let i = 0; i < 5; i++) {
-        playRound(getHumanChoice(), getComputerChoice());
+// DOM INTERACTION
+const btnContainer = document.querySelector("#buttons");
+
+btnContainer.addEventListener("click", event => {
+    if (event.target.nodeName === "BUTTON") {
+        const choice = event.target.textContent.toLowerCase();
+        playRound(choice, getComputerChoice());
     }
+});
+
+// End game by disabling buttons
+function endGame() {
+    btnContainer.querySelectorAll("button").forEach(b => b.disabled = true);
 }
 
-playGame();
+console.log("Game ready!");
